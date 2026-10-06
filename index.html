@@ -10,32 +10,32 @@
 <body>
     <div id="app">
         <!-- Tela de Login -->
-        <section id="login-view" class="view active">
-            <div class="login-left">
+        <section id="tela-login" class="tela ativa">
+            <div class="login-esquerda">
                 <h1>SGA</h1>
                 <p>Sistema de Gestão Acadêmica - Área do Docente</p>
-                <div class="login-graphic">
+                <div class="login-destaque">
                     <p>Acompanhe turmas, lance notas e gere boletins em um só lugar.</p>
                 </div>
             </div>
-            <div class="login-right">
-                <div class="card form-card">
-                    <h2>Bem-vindo ao SGA!</h2>
-                    <p class="subtitle">Entre com suas credenciais institucionais</p>
-                    <form id="login-form">
-                        <div class="form-group">
+            <div class="login-direita">
+                <div class="card card-formulario">
+                    <h2>Bem-vindo de volta</h2>
+                    <p class="subtitulo">Entre com suas credenciais institucionais</p>
+                    <form id="form-login">
+                        <div class="grupo-campo">
                             <label>E-mail institucional</label>
-                            <input type="email" id="login-email" required placeholder="email@maisunifacisa.com.br">
+                            <input type="email" id="login-email" required placeholder="professor@maisunifacisa.com.br">
                         </div>
-                        <div class="form-group">
+                        <div class="grupo-campo">
                             <label>Senha</label>
-                            <input type="password" id="login-password">
+                            <input type="password" id="login-senha" required placeholder="********">
                         </div>
-                        <button type="submit" class="btn-primary">Entrar</button>
+                        <button type="submit" class="btn-principal">Entrar</button>
                     </form>
-                    <div class="form-footer">
+                    <div class="rodape-formulario">
                         <p>Ainda não tem uma conta?</p>
-                        <a href="cadastro.html" id="link-register">Cadastre-se como professor</a>
+                        <a href="cadastro.html" id="link-cadastro">Cadastre-se como professor</a>
                     </div>
                 </div>
             </div>

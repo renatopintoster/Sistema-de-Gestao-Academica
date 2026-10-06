@@ -1,73 +1,82 @@
-// --- DATABASE MOCK (localStorage) ---
-function initData() {
+// --- BANCO DE DADOS MOCK (localStorage) ---
+function inicializarDados() {
     if (!localStorage.getItem('sga_users')) {
-        const defaultUsers = [{
+        const usuariosPadrao = [{
             email: 'professor@maisunifacisa.com.br',
-            password: '123',
-            name: 'Ana Paula Menezes',
-            subjects: ['Engenharia de Software'],
+            senha: '123',
+            nome: 'Ana Paula Menezes',
+            disciplinas: ['Engenharia de Software'],
             avatar: ''
         }];
-        localStorage.setItem('sga_users', JSON.stringify(defaultUsers));
+        localStorage.setItem('sga_users', JSON.stringify(usuariosPadrao));
     }
     
     if (!localStorage.getItem('sga_classes')) {
-        const defaultClasses = [
-            { id: 1, name: 'Engenharia de Software', period: 'ADS 2026.1' },
-            { id: 2, name: 'Banco de Dados II', period: 'ADS 2026.1' },
-            { id: 3, name: 'Programação Web', period: 'ADS 2026.1' }
+        const turmasPadrao = [
+            { id: 1, nome: 'Engenharia de Software', periodo: 'ADS 2026.1' },
+            { id: 2, nome: 'Banco de Dados II', periodo: 'ADS 2026.1' },
+            { id: 3, nome: 'Programação Web', periodo: 'ADS 2026.1' }
         ];
-        localStorage.setItem('sga_classes', JSON.stringify(defaultClasses));
+        localStorage.setItem('sga_classes', JSON.stringify(turmasPadrao));
     }
     
     if (!localStorage.getItem('sga_students')) {
-        const defaultStudents = [];
+        const alunosPadrao = [];
         const nomes = ["Beatriz Andrade", "Carlos Eduardo", "Daniela Ferreira", "Eduardo Nascimento", "Fernanda Melo", "Gustavo Pereira", "Helena Costa", "Igor Santos", "Julia Lima", "Lucas Silva"];
         
-        let mat = 2026104521;
-        for(let c=1; c<=3; c++) {
-            for(let i=0; i<10; i++) {
-                defaultStudents.push({
-                    id: mat++,
-                    classId: c,
-                    name: nomes[i] + ' ' + (c === 1 ? 'Souza' : (c === 2 ? 'Dias' : 'Gomes')),
+        let matricula = 2026104521;
+        for (let c = 1; c <= 3; c++) {
+            for (let i = 0; i < 10; i++) {
+                alunosPadrao.push({
+                    id: matricula++,
+                    turmaId: c,
+                    nome: nomes[i] + ' ' + (c === 1 ? 'Souza' : (c === 2 ? 'Dias' : 'Gomes')),
                     p1: '', p2: '', proj1: '', proj2: '', final: ''
                 });
             }
         }
-        localStorage.setItem('sga_students', JSON.stringify(defaultStudents));
+        localStorage.setItem('sga_students', JSON.stringify(alunosPadrao));
     }
 
     if (!localStorage.getItem('sga_files')) {
         localStorage.setItem('sga_files', JSON.stringify([]));
     }
 }
-initData();
+inicializarDados();
 
 // --- ESTADO GLOBAL ---
-let currentUser = JSON.parse(sessionStorage.getItem('sga_currentUser'));
-let currentClassId = null;
-let currentPage = 1;
-const ITEMS_PER_PAGE = 5;
-
-// --- UTILS ---
-function getInitials(name) {
-    return name.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase();
+let usuarioAtual = JSON.parse(sessionStorage.getItem('sga_currentUser'));
+if (usuarioAtual) {
+    // Compatibilidade com dados anteriores
+    usuarioAtual.nome = usuarioAtual.nome || usuarioAtual.name;
+    usuarioAtual.senha = usuarioAtual.senha || usuarioAtual.password;
+    usuarioAtual.disciplinas = usuarioAtual.disciplinas || usuarioAtual.subjects || [];
 }
 
-function updateAvatars() {
-    if(!currentUser) return;
-    const inits = getInitials(currentUser.name);
-    const elements = ['sidebar-avatar', 'header-avatar', 'profile-avatar'];
-    elements.forEach(id => {
-        const el = document.getElementById(id);
-        if(el) {
-            if(currentUser.avatar) {
-                el.style.backgroundImage = `url(${currentUser.avatar})`;
-                el.innerText = '';
+let turmaAtualId = null;
+let paginaAtual = 1;
+const ITENS_POR_PAGINA = 5;
+
+// --- UTILITÁRIOS ---
+function obterIniciais(nome) {
+    if (!nome) return '';
+    return nome.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase();
+}
+
+function atualizarAvatares() {
+    if (!usuarioAtual) return;
+    const iniciais = obterIniciais(usuarioAtual.nome);
+    const idsElementos = ['avatar-menu-lateral', 'avatar-cabecalho', 'avatar-perfil'];
+    
+    idsElementos.forEach(id => {
+        const elemento = document.getElementById(id);
+        if (elemento) {
+            if (usuarioAtual.avatar) {
+                elemento.style.backgroundImage = `url(${usuarioAtual.avatar})`;
+                elemento.innerText = '';
             } else {
-                el.style.backgroundImage = 'none';
-                el.innerText = inits;
+                elemento.style.backgroundImage = 'none';
+                elemento.innerText = iniciais;
             }
         }
     });
@@ -75,52 +84,57 @@ function updateAvatars() {
 
 // Verifica sessão para home.html
 if (window.location.pathname.endsWith('home.html') || window.location.pathname.endsWith('home.html/')) {
-    if (!currentUser) {
+    if (!usuarioAtual) {
         window.location.href = 'index.html';
     } else {
-        document.getElementById('sidebar-name').innerText = currentUser.name;
-        updateAvatars();
-        showSubView('classes-list-view');
+        const nomeSidebar = document.getElementById('nome-menu-lateral');
+        if (nomeSidebar) nomeSidebar.innerText = usuarioAtual.nome;
+        atualizarAvatares();
+        mostrarSubtela('subtela-turmas');
     }
 }
 
-// --- NAVEGAÇÃO SUBVIEWS (Apenas Home) ---
-function showSubView(subViewId) {
-    document.querySelectorAll('.sub-view').forEach(el => el.classList.remove('active'));
-    const targetView = document.getElementById(subViewId);
-    if(targetView) targetView.classList.add('active');
+// --- NAVEGAÇÃO DE SUBTELAS (Apenas na Home) ---
+function mostrarSubtela(idSubtela) {
+    document.querySelectorAll('.subtela').forEach(el => el.classList.remove('ativa'));
+    const subtelaAlvo = document.getElementById(idSubtela);
+    if (subtelaAlvo) subtelaAlvo.classList.add('ativa');
     
-    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-    const navItem = document.querySelector(`.nav-item[data-target="${subViewId}"]`);
-    if(navItem) navItem.classList.add('active');
+    document.querySelectorAll('.item-navegacao').forEach(el => el.classList.remove('ativo'));
+    const itemNav = document.querySelector(`.item-navegacao[data-alvo="${idSubtela}"]`);
+    if (itemNav) itemNav.classList.add('ativo');
 
-    const pageTitle = document.getElementById('page-title');
-    if(pageTitle) {
-        if(subViewId === 'classes-list-view') {
-            pageTitle.innerText = 'Minhas turmas';
-            renderClasses();
-        } else if (subViewId === 'profile-view') {
-            pageTitle.innerText = 'Meu perfil';
-            loadProfile();
-        } else if (subViewId === 'class-detail-view') {
-            pageTitle.innerText = 'Diário de Notas';
+    const tituloPagina = document.getElementById('titulo-pagina');
+    if (tituloPagina) {
+        if (idSubtela === 'subtela-turmas') {
+            tituloPagina.innerText = 'Minhas turmas';
+            renderizarTurmas();
+        } else if (idSubtela === 'subtela-perfil') {
+            tituloPagina.innerText = 'Meu perfil';
+            carregarPerfil();
+        } else if (idSubtela === 'subtela-detalhe-turma') {
+            tituloPagina.innerText = 'Diário de Notas';
         }
     }
 }
 
-// --- LOGIN & REGISTRO ---
-const loginForm = document.getElementById('login-form');
-if (loginForm) {
-    loginForm.addEventListener('submit', (e) => {
+// --- LOGIN & CADASTRO ---
+const formLogin = document.getElementById('form-login');
+if (formLogin) {
+    formLogin.addEventListener('submit', (e) => {
         e.preventDefault();
         const email = document.getElementById('login-email').value;
-        const pass = document.getElementById('login-password').value;
+        const senha = document.getElementById('login-senha').value;
         
-        const users = JSON.parse(localStorage.getItem('sga_users'));
-        const user = users.find(u => u.email === email && u.password === pass);
+        const usuarios = JSON.parse(localStorage.getItem('sga_users')) || [];
+        const usuarioEncontrado = usuarios.find(u => u.email === email && (u.senha === senha || u.password === senha));
         
-        if(user) {
-            sessionStorage.setItem('sga_currentUser', JSON.stringify(user));
+        if (usuarioEncontrado) {
+            usuarioEncontrado.nome = usuarioEncontrado.nome || usuarioEncontrado.name;
+            usuarioEncontrado.senha = usuarioEncontrado.senha || usuarioEncontrado.password;
+            usuarioEncontrado.disciplinas = usuarioEncontrado.disciplinas || usuarioEncontrado.subjects || [];
+            
+            sessionStorage.setItem('sga_currentUser', JSON.stringify(usuarioEncontrado));
             window.location.href = 'home.html';
         } else {
             alert('Credenciais inválidas!');
@@ -128,383 +142,404 @@ if (loginForm) {
     });
 }
 
-const registerForm = document.getElementById('register-form');
-if (registerForm) {
-    registerForm.addEventListener('submit', (e) => {
+const formCadastro = document.getElementById('form-cadastro');
+if (formCadastro) {
+    formCadastro.addEventListener('submit', (e) => {
         e.preventDefault();
-        const name = document.getElementById('reg-name').value;
-        const email = document.getElementById('reg-email').value;
-        const pass = document.getElementById('reg-password').value;
-        const conf = document.getElementById('reg-confirm').value;
+        const nome = document.getElementById('cad-nome').value;
+        const email = document.getElementById('cad-email').value;
+        const senha = document.getElementById('cad-senha').value;
+        const confirmacao = document.getElementById('cad-confirmar-senha').value;
         
-        if(pass !== conf) {
+        if (senha !== confirmacao) {
             alert('As senhas não coincidem!');
             return;
         }
         
-        const users = JSON.parse(localStorage.getItem('sga_users'));
-        if(users.find(u => u.email === email)) {
+        const usuarios = JSON.parse(localStorage.getItem('sga_users')) || [];
+        if (usuarios.find(u => u.email === email)) {
             alert('E-mail já cadastrado!');
             return;
         }
         
-        users.push({ name, email, subjects: [], password: pass, avatar: '' });
-        localStorage.setItem('sga_users', JSON.stringify(users));
+        usuarios.push({ nome, email, disciplinas: [], senha, avatar: '' });
+        localStorage.setItem('sga_users', JSON.stringify(usuarios));
         alert('Cadastro realizado com sucesso!');
         window.location.href = 'index.html';
     });
 }
 
-const btnLogout = document.getElementById('btn-logout');
-if(btnLogout) {
-    btnLogout.addEventListener('click', () => {
+const btnSair = document.getElementById('btn-sair');
+if (btnSair) {
+    btnSair.addEventListener('click', () => {
         sessionStorage.removeItem('sga_currentUser');
         window.location.href = 'index.html';
     });
 }
 
-// --- MENU LATERAL (Apenas Home) ---
-document.querySelectorAll('.nav-item[data-target]').forEach(item => {
+// --- MENU LATERAL (Apenas na Home) ---
+document.querySelectorAll('.item-navegacao[data-alvo]').forEach(item => {
     item.addEventListener('click', () => {
-        showSubView(item.getAttribute('data-target'));
+        mostrarSubtela(item.getAttribute('data-alvo'));
     });
 });
 
-// --- TURMAS (Apenas Home) ---
-function renderClasses() {
-    const grid = document.getElementById('classes-grid');
-    if(!grid) return;
+// --- TURMAS (Apenas na Home) ---
+function renderizarTurmas() {
+    const grid = document.getElementById('grid-turmas');
+    if (!grid) return;
 
-    const userSubjects = currentUser.subjects || [];
-    const classes = JSON.parse(localStorage.getItem('sga_classes')).filter(c => userSubjects.includes(c.name));
-    const students = JSON.parse(localStorage.getItem('sga_students'));
+    const disciplinasUsuario = usuarioAtual.disciplinas || usuarioAtual.subjects || [];
+    const turmas = (JSON.parse(localStorage.getItem('sga_classes')) || []).filter(c => {
+        const nomeTurma = c.nome || c.name;
+        return disciplinasUsuario.includes(nomeTurma);
+    });
     
+    const alunos = JSON.parse(localStorage.getItem('sga_students')) || [];
     grid.innerHTML = '';
     
-    classes.forEach(cls => {
-        const qtd = students.filter(s => s.classId === cls.id).length;
+    turmas.forEach(turma => {
+        const idTurma = turma.id;
+        const nomeTurma = turma.nome || turma.name;
+        const periodoTurma = turma.periodo || turma.period;
+        const qtdAlunos = alunos.filter(a => (a.turmaId || a.classId) === idTurma).length;
+        
         const card = document.createElement('div');
-        card.className = 'class-card';
+        card.className = 'card-turma';
         card.innerHTML = `
-            <h3>${cls.name}</h3>
-            <p>${cls.period} • ${qtd} alunos matriculados</p>
-            <div class="card-footer">
+            <h3>${nomeTurma}</h3>
+            <p>${periodoTurma} • ${qtdAlunos} alunos matriculados</p>
+            <div class="rodape-card">
                 <span>Abrir turma ></span>
             </div>
         `;
-        card.addEventListener('click', () => openClass(cls));
+        card.addEventListener('click', () => abrirTurma(turma));
         grid.appendChild(card);
     });
 }
 
-function openClass(cls) {
-    currentClassId = cls.id;
-    currentPage = 1;
-    document.getElementById('detail-class-name').innerText = cls.name;
-    document.getElementById('detail-class-desc').innerText = cls.period;
-    showSubView('class-detail-view');
-    renderGrades();
-    renderFiles();
+function abrirTurma(turma) {
+    turmaAtualId = turma.id;
+    paginaAtual = 1;
+    document.getElementById('detalhe-nome-turma').innerText = turma.nome || turma.name;
+    document.getElementById('detalhe-desc-turma').innerText = turma.periodo || turma.period;
+    mostrarSubtela('subtela-detalhe-turma');
+    renderizarNotas();
+    renderizarArquivos();
 }
 
-const btnBackClasses = document.getElementById('btn-back-classes');
-if(btnBackClasses) {
-    btnBackClasses.addEventListener('click', () => {
-        showSubView('classes-list-view');
+const btnVoltarTurmas = document.getElementById('btn-voltar-turmas');
+if (btnVoltarTurmas) {
+    btnVoltarTurmas.addEventListener('click', () => {
+        mostrarSubtela('subtela-turmas');
     });
 }
 
-// --- LÓGICA DE NOTAS (Apenas Home) ---
-function parseNota(val) {
-    if(val === '' || val === null || val === undefined) return null;
-    let n = parseFloat(val);
-    if(isNaN(n) || n < 0 || n > 10) return null;
+// --- LÓGICA DE NOTAS (Apenas na Home) ---
+function parseNota(valor) {
+    if (valor === '' || valor === null || valor === undefined) return null;
+    let n = parseFloat(valor);
+    if (isNaN(n) || n < 0 || n > 10) return null;
     return n;
 }
 
-function updateStudentGrades(student) {
-    let p1 = parseNota(student.p1);
-    let p2 = parseNota(student.p2);
-    let proj1 = parseNota(student.proj1);
-    let proj2 = parseNota(student.proj2);
-    let final = parseNota(student.final);
+function atualizarNotasAluno(aluno) {
+    let p1 = parseNota(aluno.p1);
+    let p2 = parseNota(aluno.p2);
+    let proj1 = parseNota(aluno.proj1);
+    let proj2 = parseNota(aluno.proj2);
+    let final = parseNota(aluno.final);
     
-    student.media = null;
-    student.status = '-';
+    aluno.media = null;
+    aluno.status = '-';
     
-    if(p1 !== null && p2 !== null && proj1 !== null && proj2 !== null) {
+    if (p1 !== null && p2 !== null && proj1 !== null && proj2 !== null) {
         let notaIndividual = (p1 + p2) / 2;
-        let notaProjeto  = (proj1 + proj2) / 2;
-        let mediaFinal = (notaIndividual * 0.4) + (notaProjeto   * 0.6);
-        student.media = mediaFinal.toFixed(2);
+        let notaProjeto = (proj1 + proj2) / 2;
+        let mediaFinal = (notaIndividual * 0.4) + (notaProjeto * 0.6);
+        aluno.media = mediaFinal.toFixed(2);
         
-        if(mediaFinal >= 7.0) {
-            student.status = 'Aprovado';
-        } else if(mediaFinal < 7.0 && notaProjeto    < 4.0) {
-            student.status = 'Reprovado';
+        if (mediaFinal >= 7.0) {
+            aluno.status = 'Aprovado';
+        } else if (mediaFinal < 7.0 && notaProjeto < 4.0) {
+            aluno.status = 'Reprovado';
         } else {
-            student.status = 'Fará prova final';
+            aluno.status = 'Fará prova final';
             
-            if(final !== null) {
-                if((notaProjeto  + final) >= 7.0) {
-                    student.status = 'Aprovado';
+            if (final !== null) {
+                if ((notaProjeto + final) >= 7.0) {
+                    aluno.status = 'Aprovado';
                 } else {
-                    student.status = 'Reprovado';
+                    aluno.status = 'Reprovado';
                 }
             }
         }
     }
 }
 
-function saveGrades() {
-    const students = JSON.parse(localStorage.getItem('sga_students'));
-    const index = students.findIndex(s => s.id === this.studentId);
-    if(index > -1) {
-        let val = parseFloat(this.el.value);
-        if(this.el.value !== '' && (isNaN(val) || val < 0 || val > 10)) {
+function salvarNotas() {
+    const alunos = JSON.parse(localStorage.getItem('sga_students')) || [];
+    const indice = alunos.findIndex(a => a.id === this.alunoId);
+    
+    if (indice > -1) {
+        let valor = parseFloat(this.elemento.value);
+        if (this.elemento.value !== '' && (isNaN(valor) || valor < 0 || valor > 10)) {
             alert('Nota inválida. Digite um valor entre 0 e 10.');
-            this.el.value = students[index][this.field];
+            this.elemento.value = alunos[indice][this.campo];
             return;
         }
 
-        students[index][this.field] = this.el.value;
-        updateStudentGrades(students[index]);
-        localStorage.setItem('sga_students', JSON.stringify(students));
-        renderGrades();
+        alunos[indice][this.campo] = this.elemento.value;
+        atualizarNotasAluno(alunos[indice]);
+        localStorage.setItem('sga_students', JSON.stringify(alunos));
+        renderizarNotas();
     }
 }
 
-function renderGrades() {
-    const tbody = document.getElementById('grades-tbody');
-    if(!tbody) return;
+function renderizarNotas() {
+    const tbody = document.getElementById('tbody-notas');
+    if (!tbody) return;
 
-    const allStudents = JSON.parse(localStorage.getItem('sga_students'));
-    const classStudents = allStudents.filter(s => s.classId === currentClassId);
+    const todosAlunos = JSON.parse(localStorage.getItem('sga_students')) || [];
+    const alunosTurma = todosAlunos.filter(a => (a.turmaId || a.classId) === turmaAtualId);
     
-    const totalPages = Math.ceil(classStudents.length / ITEMS_PER_PAGE);
-    const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    const paginated = classStudents.slice(start, start + ITEMS_PER_PAGE);
+    const totalPaginas = Math.ceil(alunosTurma.length / ITENS_POR_PAGINA);
+    const inicio = (paginaAtual - 1) * ITENS_POR_PAGINA;
+    const alunosPaginados = alunosTurma.slice(inicio, inicio + ITENS_POR_PAGINA);
     
     tbody.innerHTML = '';
     
-    paginated.forEach(s => {
-        updateStudentGrades(s); 
+    alunosPaginados.forEach(aluno => {
+        atualizarNotasAluno(aluno); 
         
-        let statusClass = '';
-        if(s.status === 'Aprovado') statusClass = 'status-aprovado';
-        if(s.status === 'Reprovado') statusClass = 'status-reprovado';
-        if(s.status === 'Fará prova final') statusClass = 'status-final';
+        let classeStatus = '';
+        if (aluno.status === 'Aprovado') classeStatus = 'status-aprovado';
+        if (aluno.status === 'Reprovado') classeStatus = 'status-reprovado';
+        if (aluno.status === 'Fará prova final') classeStatus = 'status-final';
         
-        const isFaraFinal = s.status === 'Fará prova final';
+        const isFaraFinal = aluno.status === 'Fará prova final';
         
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td>${s.id}</td>
-            <td>${s.name}</td>
-            <td><input type="number" step="0.1" min="0" max="10" class="input-nota" data-id="${s.id}" data-field="p1" value="${s.p1}"></td>
-            <td><input type="number" step="0.1" min="0" max="10" class="input-nota" data-id="${s.id}" data-field="p2" value="${s.p2}"></td>
-            <td><input type="number" step="0.1" min="0" max="10" class="input-nota" data-id="${s.id}" data-field="proj1" value="${s.proj1}"></td>
-            <td><input type="number" step="0.1" min="0" max="10" class="input-nota" data-id="${s.id}" data-field="proj2" value="${s.proj2}"></td>
-            <td><strong>${s.media || '-'}</strong></td>
-            <td><span class="status-badge ${statusClass}">${s.status}</span></td>
-            <td><input type="number" step="0.1" min="0" max="10" class="input-nota" data-id="${s.id}" data-field="final" value="${s.final}" ${isFaraFinal || s.final !== '' && s.media < 7.0 && parseNota(s.proj1)!==null && parseNota(s.proj2)!==null && ((parseNota(s.proj1)+parseNota(s.proj2))/2) >= 4.0 ? '' : 'disabled'}></td>
+            <td>${aluno.id}</td>
+            <td>${aluno.nome || aluno.name}</td>
+            <td><input type="number" step="0.1" min="0" max="10" class="input-nota" data-id="${aluno.id}" data-campo="p1" value="${aluno.p1}"></td>
+            <td><input type="number" step="0.1" min="0" max="10" class="input-nota" data-id="${aluno.id}" data-campo="p2" value="${aluno.p2}"></td>
+            <td><input type="number" step="0.1" min="0" max="10" class="input-nota" data-id="${aluno.id}" data-campo="proj1" value="${aluno.proj1}"></td>
+            <td><input type="number" step="0.1" min="0" max="10" class="input-nota" data-id="${aluno.id}" data-campo="proj2" value="${aluno.proj2}"></td>
+            <td><strong>${aluno.media || '-'}</strong></td>
+            <td><span class="badge-status ${classeStatus}">${aluno.status}</span></td>
+            <td><input type="number" step="0.1" min="0" max="10" class="input-nota" data-id="${aluno.id}" data-campo="final" value="${aluno.final}" ${isFaraFinal || (aluno.final !== '' && aluno.media < 7.0 && parseNota(aluno.proj1) !== null && parseNota(aluno.proj2) !== null && ((parseNota(aluno.proj1) + parseNota(aluno.proj2)) / 2) >= 4.0) ? '' : 'disabled'}></td>
         `;
         tbody.appendChild(tr);
     });
     
-    document.querySelectorAll('.input-nota').forEach(inp => {
-        inp.addEventListener('blur', function() {
-            const studentId = parseInt(this.getAttribute('data-id'));
-            const field = this.getAttribute('data-field');
-            saveGrades.call({studentId, field, el: this});
+    document.querySelectorAll('.input-nota').forEach(input => {
+        input.addEventListener('blur', function() {
+            const alunoId = parseInt(this.getAttribute('data-id'));
+            const campo = this.getAttribute('data-campo');
+            salvarNotas.call({ alunoId, campo, elemento: this });
         });
     });
     
-    renderPagination(totalPages);
+    renderizarPaginacao(totalPaginas);
 }
 
-function renderPagination(totalPages) {
-    const pag = document.getElementById('pagination');
-    if(!pag) return;
-    pag.innerHTML = '';
-    for(let i=1; i<=totalPages; i++) {
+function renderizarPaginacao(totalPaginas) {
+    const containerPaginacao = document.getElementById('paginacao');
+    if (!containerPaginacao) return;
+    
+    containerPaginacao.innerHTML = '';
+    for (let i = 1; i <= totalPaginas; i++) {
         const btn = document.createElement('button');
-        btn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
+        btn.className = `btn-pagina ${i === paginaAtual ? 'ativo' : ''}`;
         btn.innerText = i;
-        btn.onclick = () => { currentPage = i; renderGrades(); };
-        pag.appendChild(btn);
+        btn.onclick = () => { paginaAtual = i; renderizarNotas(); };
+        containerPaginacao.appendChild(btn);
     }
 }
 
-// --- ARQUIVOS (Apenas Home) ---
-const fileUpload = document.getElementById('file-upload');
-if(fileUpload) {
-    fileUpload.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if(!file) return;
-        if(file.type !== 'application/pdf') {
+// --- ARQUIVOS (Apenas na Home) ---
+const uploadArquivo = document.getElementById('upload-arquivo');
+if (uploadArquivo) {
+    uploadArquivo.addEventListener('change', function(e) {
+        const arquivo = e.target.files[0];
+        if (!arquivo) return;
+        if (arquivo.type !== 'application/pdf') {
             alert('Apenas arquivos PDF são permitidos.');
             return;
         }
         
-        const reader = new FileReader();
-        reader.onload = function(evt) {
+        const leitor = new FileReader();
+        leitor.onload = function(evt) {
             const base64 = evt.target.result;
-            const files = JSON.parse(localStorage.getItem('sga_files')) || [];
+            const arquivos = JSON.parse(localStorage.getItem('sga_files')) || [];
             try {
-                files.push({
+                arquivos.push({
                     id: Date.now(),
-                    classId: currentClassId,
-                    name: file.name,
-                    data: base64,
-                    date: new Date().toLocaleDateString()
+                    turmaId: turmaAtualId,
+                    nome: arquivo.name,
+                    dados: base64,
+                    dataCriacao: new Date().toLocaleDateString()
                 });
-                localStorage.setItem('sga_files', JSON.stringify(files));
-                renderFiles();
-            } catch(err) {
-                alert('Erro ao salvar. O arquivo pode ser muito grande para o armazenamento local. O limite do navegador pode ter sido excedido.');
+                localStorage.setItem('sga_files', JSON.stringify(arquivos));
+                renderizarArquivos();
+            } catch (err) {
+                alert('Erro ao salvar. O arquivo pode ser muito grande para o armazenamento local.');
             }
         };
-        reader.readAsDataURL(file);
+        leitor.readAsDataURL(arquivo);
         e.target.value = '';
     });
 }
 
-function renderFiles() {
-    const ul = document.getElementById('files-list');
-    if(!ul) return;
+function renderizarArquivos() {
+    const ul = document.getElementById('lista-arquivos');
+    if (!ul) return;
     
-    const allFiles = JSON.parse(localStorage.getItem('sga_files')) || [];
-    const classFiles = allFiles.filter(f => f.classId === currentClassId);
+    const todosArquivos = JSON.parse(localStorage.getItem('sga_files')) || [];
+    const arquivosTurma = todosArquivos.filter(f => (f.turmaId || f.classId) === turmaAtualId);
     
     ul.innerHTML = '';
     
-    if(classFiles.length === 0) {
+    if (arquivosTurma.length === 0) {
         ul.innerHTML = '<li>Nenhum arquivo anexado.</li>';
         return;
     }
     
-    classFiles.forEach(f => {
+    arquivosTurma.forEach(arq => {
+        const nomeArquivo = arq.nome || arq.name;
+        const dadosArquivo = arq.dados || arq.data;
+        const dataArquivo = arq.dataCriacao || arq.date || '';
+        
         const li = document.createElement('li');
         li.innerHTML = `
-            <span><i class="fas fa-file-pdf" style="color:var(--vermelho); margin-right:8px;"></i> ${f.name} <small>(${f.date})</small></span>
+            <span><i class="fas fa-file-pdf" style="color:var(--vermelho); margin-right:8px;"></i> ${nomeArquivo} <small>(${dataArquivo})</small></span>
             <div>
-                <a href="${f.data}" download="${f.name}" style="margin-right: 15px;"><i class="fas fa-download"></i> Baixar</a>
-                <a href="#" onclick="deleteFile(${f.id}); return false;" style="color: var(--vermelho);"><i class="fas fa-trash"></i> Excluir</a>
+                <a href="${dadosArquivo}" download="${nomeArquivo}" style="margin-right: 15px;"><i class="fas fa-download"></i> Baixar</a>
+                <a href="#" onclick="excluirArquivo(${arq.id}); return false;" style="color: var(--vermelho);"><i class="fas fa-trash"></i> Excluir</a>
             </div>
         `;
         ul.appendChild(li);
     });
 }
 
-function deleteFile(id) {
-    if(confirm('Tem certeza que deseja excluir este arquivo?')) {
-        let files = JSON.parse(localStorage.getItem('sga_files')) || [];
-        files = files.filter(f => f.id !== id);
-        localStorage.setItem('sga_files', JSON.stringify(files));
-        renderFiles();
+function excluirArquivo(id) {
+    if (confirm('Tem certeza que deseja excluir este arquivo?')) {
+        let arquivos = JSON.parse(localStorage.getItem('sga_files')) || [];
+        arquivos = arquivos.filter(f => f.id !== id);
+        localStorage.setItem('sga_files', JSON.stringify(arquivos));
+        renderizarArquivos();
     }
 }
 
-// --- PERFIL (Apenas Home) ---
-function loadProfile() {
-    const profName = document.getElementById('prof-name');
-    if(!profName) return;
+// --- PERFIL (Apenas na Home) ---
+function carregarPerfil() {
+    const profNome = document.getElementById('prof-nome');
+    if (!profNome) return;
 
-    profName.value = currentUser.name;
-    document.getElementById('prof-email').value = currentUser.email;
-    document.getElementById('prof-password').value = '';
-    document.getElementById('prof-confirm-password').value = '';
+    profNome.value = usuarioAtual.nome;
+    document.getElementById('prof-email').value = usuarioAtual.email;
+    document.getElementById('prof-senha').value = '';
+    document.getElementById('prof-confirmar-senha').value = '';
     
-    const checkboxes = document.querySelectorAll('#prof-subjects input[type="checkbox"]');
-    const userSubjects = currentUser.subjects || [];
+    const checkboxes = document.querySelectorAll('#prof-disciplinas input[type="checkbox"]');
+    const disciplinasUsuario = usuarioAtual.disciplinas || usuarioAtual.subjects || [];
     checkboxes.forEach(cb => {
-        cb.checked = userSubjects.includes(cb.value);
+        cb.checked = disciplinasUsuario.includes(cb.value);
     });
 }
 
-const profileForm = document.getElementById('profile-form');
-if(profileForm) {
-    profileForm.addEventListener('submit', (e) => {
+const formPerfil = document.getElementById('form-perfil');
+if (formPerfil) {
+    formPerfil.addEventListener('submit', (e) => {
         e.preventDefault();
         
-        const users = JSON.parse(localStorage.getItem('sga_users'));
-        const idx = users.findIndex(u => u.email === currentUser.email);
+        const usuarios = JSON.parse(localStorage.getItem('sga_users')) || [];
+        const idx = usuarios.findIndex(u => u.email === usuarioAtual.email);
         
-        const newEmail = document.getElementById('prof-email').value;
-        const newPassword = document.getElementById('prof-password').value;
-        const confirmPassword = document.getElementById('prof-confirm-password').value;
+        const novoEmail = document.getElementById('prof-email').value;
+        const novaSenha = document.getElementById('prof-senha').value;
+        const confirmarSenha = document.getElementById('prof-confirmar-senha').value;
         
-        if (newEmail !== currentUser.email) {
-            if (users.find(u => u.email === newEmail)) {
+        if (novoEmail !== usuarioAtual.email) {
+            if (usuarios.find(u => u.email === novoEmail)) {
                 alert('Este e-mail já está em uso por outro professor.');
                 return;
             }
         }
         
-        if (newPassword) {
-            if (newPassword !== confirmPassword) {
+        if (novaSenha) {
+            if (novaSenha !== confirmarSenha) {
                 alert('As novas senhas não coincidem!');
                 return;
             }
-            currentUser.password = newPassword;
+            usuarioAtual.senha = novaSenha;
         }
 
-        currentUser.name = document.getElementById('prof-name').value;
-        currentUser.email = newEmail;
+        usuarioAtual.nome = document.getElementById('prof-nome').value;
+        usuarioAtual.email = novoEmail;
         
-        const checkboxes = document.querySelectorAll('#prof-subjects input[type="checkbox"]:checked');
-        currentUser.subjects = Array.from(checkboxes).map(cb => cb.value);
+        const checkboxes = document.querySelectorAll('#prof-disciplinas input[type="checkbox"]:checked');
+        usuarioAtual.disciplinas = Array.from(checkboxes).map(cb => cb.value);
         
-        users[idx] = currentUser;
-        localStorage.setItem('sga_users', JSON.stringify(users));
+        if (idx > -1) {
+            usuarios[idx] = usuarioAtual;
+        } else {
+            usuarios.push(usuarioAtual);
+        }
+        localStorage.setItem('sga_users', JSON.stringify(usuarios));
+        sessionStorage.setItem('sga_currentUser', JSON.stringify(usuarioAtual));
         
-        sessionStorage.setItem('sga_currentUser', JSON.stringify(currentUser));
-        
-        document.getElementById('sidebar-name').innerText = currentUser.name;
-        updateAvatars();
+        const nomeSidebar = document.getElementById('nome-menu-lateral');
+        if (nomeSidebar) nomeSidebar.innerText = usuarioAtual.nome;
+        atualizarAvatares();
         alert('Perfil atualizado com sucesso!');
-        renderClasses();
+        renderizarTurmas();
         
-        document.getElementById('prof-password').value = '';
-        document.getElementById('prof-confirm-password').value = '';
+        document.getElementById('prof-senha').value = '';
+        document.getElementById('prof-confirmar-senha').value = '';
     });
 }
 
-const avatarUpload = document.getElementById('avatar-upload');
-if(avatarUpload) {
-    avatarUpload.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if(!file) return;
+const uploadAvatar = document.getElementById('upload-avatar');
+if (uploadAvatar) {
+    uploadAvatar.addEventListener('change', function(e) {
+        const arquivo = e.target.files[0];
+        if (!arquivo) return;
         
-        const reader = new FileReader();
-        reader.onload = function(evt) {
+        const leitor = new FileReader();
+        leitor.onload = function(evt) {
             try {
-                currentUser.avatar = evt.target.result;
-                const users = JSON.parse(localStorage.getItem('sga_users'));
-                const idx = users.findIndex(u => u.email === currentUser.email);
-                users[idx].avatar = currentUser.avatar;
-                localStorage.setItem('sga_users', JSON.stringify(users));
-                sessionStorage.setItem('sga_currentUser', JSON.stringify(currentUser));
-                updateAvatars();
-            } catch(err) {
+                usuarioAtual.avatar = evt.target.result;
+                const usuarios = JSON.parse(localStorage.getItem('sga_users')) || [];
+                const idx = usuarios.findIndex(u => u.email === usuarioAtual.email);
+                if (idx > -1) {
+                    usuarios[idx].avatar = usuarioAtual.avatar;
+                    localStorage.setItem('sga_users', JSON.stringify(usuarios));
+                }
+                sessionStorage.setItem('sga_currentUser', JSON.stringify(usuarioAtual));
+                atualizarAvatares();
+            } catch (err) {
                 alert('A imagem é muito grande para ser salva no armazenamento local.');
             }
         };
-        reader.readAsDataURL(file);
+        leitor.readAsDataURL(arquivo);
         e.target.value = '';
     });
 }
 
-const btnRemoveAvatar = document.getElementById('btn-remove-avatar');
-if(btnRemoveAvatar) {
-    btnRemoveAvatar.addEventListener('click', () => {
-        currentUser.avatar = '';
-        const users = JSON.parse(localStorage.getItem('sga_users'));
-        const idx = users.findIndex(u => u.email === currentUser.email);
-        users[idx].avatar = '';
-        localStorage.setItem('sga_users', JSON.stringify(users));
-        sessionStorage.setItem('sga_currentUser', JSON.stringify(currentUser));
-        updateAvatars();
+const btnRemoverAvatar = document.getElementById('btn-remover-avatar');
+if (btnRemoverAvatar) {
+    btnRemoverAvatar.addEventListener('click', () => {
+        usuarioAtual.avatar = '';
+        const usuarios = JSON.parse(localStorage.getItem('sga_users')) || [];
+        const idx = usuarios.findIndex(u => u.email === usuarioAtual.email);
+        if (idx > -1) {
+            usuarios[idx].avatar = '';
+            localStorage.setItem('sga_users', JSON.stringify(usuarios));
+        }
+        sessionStorage.setItem('sga_currentUser', JSON.stringify(usuarioAtual));
+        atualizarAvatares();
     });
 }

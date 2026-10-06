@@ -31,24 +31,24 @@ body {
     height: 100%;
 }
 
-.view {
+.tela {
     display: none;
     height: 100%;
 }
 
-.view.active {
+.tela.ativa {
     display: flex;
 }
 
-/* LOGIN & REGISTER */
-#login-view, #register-view {
+/* LOGIN & CADASTRO */
+#tela-login, #tela-cadastro {
     display: none;
 }
-#login-view.active, #register-view.active {
+#tela-login.ativa, #tela-cadastro.ativa {
     display: flex;
 }
 
-.login-left {
+.login-esquerda {
     flex: 1;
     background-color: var(--azul-marinho);
     color: var(--branco);
@@ -60,19 +60,19 @@ body {
     overflow: hidden;
 }
 
-.login-left h1 {
+.login-esquerda h1 {
     font-size: 3rem;
     margin-bottom: 0.5rem;
 }
 
-.login-graphic {
+.login-destaque {
     margin-top: 4rem;
     font-size: 1.2rem;
     font-weight: 500;
     z-index: 1;
 }
 
-.login-left::before {
+.login-esquerda::before {
     content: '';
     position: absolute;
     bottom: -10%;
@@ -84,7 +84,7 @@ body {
     z-index: 0;
 }
 
-.login-left::after {
+.login-esquerda::after {
     content: '';
     position: absolute;
     top: 20%;
@@ -96,7 +96,7 @@ body {
     z-index: 0;
 }
 
-.login-right {
+.login-direita {
     flex: 1;
     display: flex;
     align-items: center;
@@ -118,24 +118,24 @@ body {
     margin-bottom: 0.5rem;
 }
 
-.card .subtitle {
+.card .subtitulo {
     color: var(--cinza-medio);
     margin-bottom: 2rem;
     font-size: 0.9rem;
 }
 
-.form-group {
+.grupo-campo {
     margin-bottom: 1.5rem;
 }
 
-.form-group label {
+.grupo-campo label {
     display: block;
     font-weight: 500;
     margin-bottom: 0.5rem;
     font-size: 0.9rem;
 }
 
-.form-group input {
+.grupo-campo input {
     width: 100%;
     padding: 0.75rem 1rem;
     border: 1px solid #ddd;
@@ -145,18 +145,18 @@ body {
     transition: border-color 0.2s;
 }
 
-.form-group input:focus {
+.grupo-campo input:focus {
     border-color: var(--azul-principal);
 }
 
-.checkbox-group {
+.grupo-checkbox {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
     margin-top: 0.5rem;
 }
 
-.checkbox-group label {
+.grupo-checkbox label {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -165,12 +165,12 @@ body {
     cursor: pointer;
 }
 
-.checkbox-group input[type="checkbox"] {
+.grupo-checkbox input[type="checkbox"] {
     width: auto;
     margin: 0;
 }
 
-.btn-primary {
+.btn-principal {
     width: 100%;
     background-color: var(--azul-principal);
     color: var(--branco);
@@ -182,11 +182,11 @@ body {
     transition: background-color 0.2s;
 }
 
-.btn-primary:hover {
+.btn-principal:hover {
     background-color: #155bb5;
 }
 
-.btn-secondary {
+.btn-secundario {
     background-color: var(--branco);
     color: var(--cinza-escuro);
     border: 1px solid #ddd;
@@ -197,29 +197,29 @@ body {
     transition: background 0.2s;
 }
 
-.btn-secondary:hover {
+.btn-secundario:hover {
     background-color: #f1f1f1;
 }
 
-.form-footer {
+.rodape-formulario {
     margin-top: 2rem;
     text-align: center;
     font-size: 0.9rem;
 }
 
-.form-footer a {
+.rodape-formulario a {
     color: var(--azul-principal);
     text-decoration: none;
     font-weight: 600;
 }
 
-/* HOME LAYOUT */
-.layout-home {
+/* LAYOUT PRINCIPAL (HOME) */
+.layout-principal {
     display: flex;
     width: 100vw;
 }
 
-#sidebar {
+#menu-lateral {
     width: 260px;
     background-color: var(--azul-marinho);
     color: var(--branco);
@@ -227,31 +227,31 @@ body {
     flex-direction: column;
 }
 
-.sidebar-header {
+.cabecalho-menu-lateral {
     padding: 2rem 1.5rem;
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
-.sidebar-header h2 {
+.cabecalho-menu-lateral h2 {
     font-size: 1.8rem;
 }
 
-.sidebar-header span {
+.cabecalho-menu-lateral span {
     font-size: 0.8rem;
     background: rgba(255,255,255,0.2);
     padding: 2px 6px;
     border-radius: 4px;
 }
 
-.nav-menu {
+.menu-navegacao {
     list-style: none;
     flex: 1;
     padding: 0 1rem;
 }
 
-.nav-item {
+.item-navegacao {
     padding: 0.8rem 1rem;
     margin-bottom: 0.5rem;
     border-radius: 6px;
@@ -263,12 +263,12 @@ body {
     transition: 0.2s;
 }
 
-.nav-item:hover, .nav-item.active {
+.item-navegacao:hover, .item-navegacao.ativo {
     background-color: var(--azul-principal);
     color: var(--branco);
 }
 
-.sidebar-footer {
+.rodape-menu-lateral {
     padding: 1.5rem;
     display: flex;
     align-items: center;
@@ -276,7 +276,7 @@ body {
     border-top: 1px solid rgba(255,255,255,0.1);
 }
 
-.user-avatar-small {
+.avatar-usuario-pequeno {
     width: 36px;
     height: 36px;
     background-color: var(--azul-claro);
@@ -291,21 +291,21 @@ body {
     background-position: center;
 }
 
-.user-info {
+.info-usuario {
     display: flex;
     flex-direction: column;
     font-size: 0.85rem;
 }
 
-.user-info strong {
+.info-usuario strong {
     color: var(--branco);
 }
 
-.user-info span {
+.info-usuario span {
     color: #a0aec0;
 }
 
-#content {
+#conteudo-principal {
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -313,7 +313,7 @@ body {
     overflow: hidden;
 }
 
-.top-header {
+.cabecalho-topo {
     height: 70px;
     border-bottom: 1px solid #eee;
     display: flex;
@@ -322,38 +322,38 @@ body {
     padding: 0 2rem;
 }
 
-.top-header h2 {
+.cabecalho-topo h2 {
     font-size: 1.2rem;
     font-weight: 600;
 }
 
-.content-body {
+.corpo-conteudo {
     flex: 1;
     padding: 2rem;
     overflow-y: auto;
     background-color: var(--fundo);
 }
 
-.sub-view {
+.subtela {
     display: none;
 }
-.sub-view.active {
+.subtela.ativa {
     display: block;
 }
 
-.section-desc {
+.desc-secao {
     color: var(--cinza-medio);
     margin-bottom: 2rem;
 }
 
-/* CLASSES GRID */
-.classes-grid {
+/* GRID DE TURMAS */
+.grid-turmas {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 1.5rem;
 }
 
-.class-card {
+.card-turma {
     background: var(--branco);
     border-radius: 8px;
     padding: 1.5rem;
@@ -363,23 +363,23 @@ body {
     transition: transform 0.2s;
 }
 
-.class-card:hover {
+.card-turma:hover {
     transform: translateY(-3px);
 }
 
-.class-card h3 {
+.card-turma h3 {
     color: var(--cinza-escuro);
     margin-bottom: 0.5rem;
     font-size: 1.1rem;
 }
 
-.class-card p {
+.card-turma p {
     color: var(--cinza-medio);
     font-size: 0.85rem;
     margin-bottom: 1.5rem;
 }
 
-.class-card .card-footer {
+.card-turma .rodape-card {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -388,8 +388,8 @@ body {
     font-weight: 600;
 }
 
-/* TABLE */
-.btn-back {
+/* TABELA DE NOTAS */
+.btn-voltar {
     background: none;
     border: none;
     color: var(--azul-principal);
@@ -401,16 +401,16 @@ body {
     gap: 5px;
 }
 
-.class-header-info {
+.info-cabecalho-turma {
     margin-bottom: 2rem;
 }
 
-.class-header-info h3 {
+.info-cabecalho-turma h3 {
     font-size: 1.5rem;
     color: var(--azul-marinho);
 }
 
-.table-container {
+.container-tabela {
     background: var(--branco);
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.03);
@@ -448,7 +448,7 @@ th {
     outline: none;
 }
 
-.status-badge {
+.badge-status {
     padding: 4px 10px;
     border-radius: 12px;
     font-size: 0.75rem;
@@ -462,28 +462,28 @@ th {
 .status-reprovado { background-color: var(--vermelho); }
 .status-final { background-color: var(--ambar); }
 
-.pagination {
+.paginacao {
     display: flex;
     justify-content: flex-end;
     gap: 5px;
     margin-top: 1.5rem;
 }
 
-.page-btn {
+.btn-pagina {
     padding: 5px 10px;
     border: 1px solid #ddd;
     background: var(--branco);
     border-radius: 4px;
     cursor: pointer;
 }
-.page-btn.active {
+.btn-pagina.ativo {
     background: var(--azul-principal);
     color: var(--branco);
     border-color: var(--azul-principal);
 }
 
-/* FILES */
-.files-section {
+/* SEÇÃO DE ARQUIVOS */
+.secao-arquivos {
     margin-top: 2rem;
     background: var(--branco);
     padding: 1.5rem;
@@ -491,23 +491,23 @@ th {
     box-shadow: 0 2px 10px rgba(0,0,0,0.03);
 }
 
-.files-section h4 {
+.secao-arquivos h4 {
     margin-bottom: 0.5rem;
     color: var(--azul-marinho);
 }
 
-.upload-area {
+.area-upload {
     margin-bottom: 1rem;
     display: inline-block;
 }
-.upload-area input {
+.area-upload input {
     display: none;
 }
 
-.files-list {
+.lista-arquivos {
     list-style: none;
 }
-.files-list li {
+.lista-arquivos li {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -515,25 +515,25 @@ th {
     border-bottom: 1px solid #eee;
     font-size: 0.9rem;
 }
-.files-list li a {
+.lista-arquivos li a {
     color: var(--azul-principal);
     text-decoration: none;
     font-weight: 500;
 }
 
-/* PROFILE */
-.profile-card {
+/* PERFIL */
+.card-perfil {
     max-width: 600px;
 }
 
-.profile-header {
+.cabecalho-perfil {
     display: flex;
     align-items: center;
     gap: 2rem;
     margin-bottom: 2rem;
 }
 
-.avatar-large {
+.avatar-grande {
     width: 100px;
     height: 100px;
     background-color: var(--azul-claro);
@@ -548,13 +548,13 @@ th {
     background-position: center;
 }
 
-.avatar-actions p {
+.acoes-avatar p {
     font-size: 0.85rem;
     color: var(--cinza-medio);
     margin-bottom: 1rem;
 }
 
-.avatar-actions .buttons {
+.acoes-avatar .botoes {
     display: flex;
     gap: 10px;
 }

@@ -10,37 +10,37 @@
 <body>
     <div id="app">
         <!-- Tela de Cadastro -->
-        <section id="register-view" class="view active">
-            <div class="login-left">
+        <section id="tela-cadastro" class="tela ativa">
+            <div class="login-esquerda">
                 <h1>SGA</h1>
                 <p>Sistema de Gestão Acadêmica - Área do Docente</p>
-                <div class="login-graphic">
+                <div class="login-destaque">
                     <p>Crie sua conta de professor para começar a lançar notas.</p>
                 </div>
             </div>
-            <div class="login-right">
-                <div class="card form-card">
+            <div class="login-direita">
+                <div class="card card-formulario">
                     <h2>Criar conta de professor</h2>
-                    <p class="subtitle">Preencha os dados abaixo para se cadastrar</p>
-                    <form id="register-form">
-                        <div class="form-group">
+                    <p class="subtitulo">Preencha os dados abaixo para se cadastrar</p>
+                    <form id="form-cadastro">
+                        <div class="grupo-campo">
                             <label>Nome completo</label>
-                            <input type="text" id="reg-name">
+                            <input type="text" id="cad-nome" required placeholder="Ana Paula Menezes">
                         </div>
-                        <div class="form-group">
+                        <div class="grupo-campo">
                             <label>E-mail institucional</label>
-                            <input type="email" id="reg-email">
+                            <input type="email" id="cad-email" required placeholder="professor@maisunifacisa.com.br">
                         </div>
-                        <div class="form-group">
+                        <div class="grupo-campo">
                             <label>Senha</label>
-                            <input type="password" id="reg-password">
+                            <input type="password" id="cad-senha" required placeholder="********">
                         </div>
-                        <div class="form-group">
+                        <div class="grupo-campo">
                             <label>Confirmar senha</label>
-                            <input type="password" id="reg-confirm">
+                            <input type="password" id="cad-confirmar-senha" required placeholder="********">
                         </div>
-                        <button type="submit" class="btn-primary">Cadastrar</button>
-                        <div class="form-footer" style="margin-top:15px;">
+                        <button type="submit" class="btn-principal">Cadastrar</button>
+                        <div class="rodape-formulario" style="margin-top:15px;">
                             <a href="index.html" id="link-login">Voltar para o login</a>
                         </div>
                     </form>

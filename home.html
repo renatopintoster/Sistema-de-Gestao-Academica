@@ -3,64 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SGA - Dashboard</title>
+    <title>SGA - Painel</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div id="app">
-        <!-- Home (Logado) -->
-        <section id="home-view" class="view active layout-home">
-            <nav id="sidebar">
-                <div class="sidebar-header">
+        <!-- Tela Principal (Logado) -->
+        <section id="tela-principal" class="tela ativa layout-principal">
+            <nav id="menu-lateral">
+                <div class="cabecalho-menu-lateral">
                     <h2>SGA</h2>
                     <span>Docente</span>
                 </div>
-                <ul class="nav-menu">
-                    <li class="nav-item active" data-target="classes-list-view">
+                <ul class="menu-navegacao">
+                    <li class="item-navegacao ativo" data-alvo="subtela-turmas">
                         <i class="fas fa-chalkboard"></i> Minhas turmas
                     </li>
-                    <li class="nav-item" data-target="profile-view">
+                    <li class="item-navegacao" data-alvo="subtela-perfil">
                         <i class="fas fa-user"></i> Meu perfil
                     </li>
-                    <li class="nav-item" id="btn-logout">
+                    <li class="item-navegacao" id="btn-sair">
                         <i class="fas fa-sign-out-alt"></i> Sair
                     </li>
                 </ul>
-                <div class="sidebar-footer">
-                    <div class="user-avatar-small" id="sidebar-avatar"></div>
-                    <div class="user-info">
-                        <strong id="sidebar-name">Nome</strong>
+                <div class="rodape-menu-lateral">
+                    <div class="avatar-usuario-pequeno" id="avatar-menu-lateral"></div>
+                    <div class="info-usuario">
+                        <strong id="nome-menu-lateral">Nome</strong>
                         <span>Professor(a)</span>
                     </div>
                 </div>
             </nav>
             
-            <main id="content">
-                <header class="top-header">
-                    <h2 id="page-title">Minhas turmas</h2>
-                    <div class="user-avatar-small" id="header-avatar"></div>
+            <main id="conteudo-principal">
+                <header class="cabecalho-topo">
+                    <h2 id="titulo-pagina">Minhas turmas</h2>
+                    <div class="avatar-usuario-pequeno" id="avatar-cabecalho"></div>
                 </header>
                 
-                <div class="content-body">
-                    <!-- Lista de Turmas -->
-                    <div id="classes-list-view" class="sub-view active">
-                        <p class="section-desc">Selecione uma turma para ver o diário de notas</p>
-                        <div class="classes-grid" id="classes-grid">
+                <div class="corpo-conteudo">
+                    <!-- Subtela de Turmas -->
+                    <div id="subtela-turmas" class="subtela ativa">
+                        <p class="desc-secao">Selecione uma turma para ver o diário de notas</p>
+                        <div class="grid-turmas" id="grid-turmas">
                             <!-- Injetado via JS -->
                         </div>
                     </div>
 
-                    <!-- Detalhes da Turma (Tabela de Notas) -->
-                    <div id="class-detail-view" class="sub-view">
-                        <button class="btn-back" id="btn-back-classes"><i class="fas fa-arrow-left"></i> Voltar para minhas turmas</button>
-                        <div class="class-header-info">
-                            <h3 id="detail-class-name">Disciplina</h3>
-                            <p id="detail-class-desc">Info</p>
+                    <!-- Subtela de Detalhes da Turma (Tabela de Notas) -->
+                    <div id="subtela-detalhe-turma" class="subtela">
+                        <button class="btn-voltar" id="btn-voltar-turmas"><i class="fas fa-arrow-left"></i> Voltar para minhas turmas</button>
+                        <div class="info-cabecalho-turma">
+                            <h3 id="detalhe-nome-turma">Disciplina</h3>
+                            <p id="detalhe-desc-turma">Info</p>
                         </div>
                         
-                        <div class="table-container">
-                            <table id="grades-table">
+                        <div class="container-tabela">
+                            <table id="tabela-notas">
                                 <thead>
                                     <tr>
                                         <th>Matrícula</th>
@@ -74,70 +74,70 @@
                                         <th>Final</th>
                                     </tr>
                                 </thead>
-                                <tbody id="grades-tbody">
+                                <tbody id="tbody-notas">
                                     <!-- Injetado via JS -->
                                 </tbody>
                             </table>
-                            <div class="pagination" id="pagination">
+                            <div class="paginacao" id="paginacao">
                                 <!-- Injetado via JS -->
                             </div>
                         </div>
 
-                        <!-- Área de Arquivos (Desafio Extra) -->
-                        <div class="files-section">
+                        <!-- Área de Arquivos -->
+                        <div class="secao-arquivos">
                             <h4>Arquivos da Disciplina</h4>
-                            <p class="section-desc">Anexe materiais de apoio em PDF para a turma.</p>
-                            <div class="upload-area">
-                                <input type="file" id="file-upload" accept="application/pdf">
-                                <label for="file-upload" class="btn-secondary"><i class="fas fa-upload"></i> Anexar PDF</label>
+                            <p class="desc-secao">Anexe materiais de apoio em PDF para a turma.</p>
+                            <div class="area-upload">
+                                <input type="file" id="upload-arquivo" accept="application/pdf">
+                                <label for="upload-arquivo" class="btn-secundario"><i class="fas fa-upload"></i> Anexar PDF</label>
                             </div>
-                            <ul class="files-list" id="files-list">
+                            <ul class="lista-arquivos" id="lista-arquivos">
                                 <!-- Injetado via JS -->
                             </ul>
                         </div>
                     </div>
 
-                    <!-- Perfil -->
-                    <div id="profile-view" class="sub-view">
-                        <p class="section-desc">Atualize sua foto e seus dados cadastrais</p>
-                        <div class="card profile-card">
-                            <div class="profile-header">
-                                <div class="avatar-large" id="profile-avatar">AM</div>
-                                <div class="avatar-actions">
+                    <!-- Subtela de Perfil -->
+                    <div id="subtela-perfil" class="subtela">
+                        <p class="desc-secao">Atualize sua foto e seus dados cadastrais</p>
+                        <div class="card card-perfil">
+                            <div class="cabecalho-perfil">
+                                <div class="avatar-grande" id="avatar-perfil">AM</div>
+                                <div class="acoes-avatar">
                                     <p><strong>Foto do perfil</strong><br>PNG ou JPG, até 2 MB.</p>
-                                    <div class="buttons">
-                                        <input type="file" id="avatar-upload" accept="image/png, image/jpeg" style="display:none;">
-                                        <button class="btn-primary" onclick="document.getElementById('avatar-upload').click()" type="button">Alterar foto</button>
-                                        <button class="btn-secondary" id="btn-remove-avatar" type="button">Remover</button>
+                                    <div class="botoes">
+                                        <input type="file" id="upload-avatar" accept="image/png, image/jpeg" style="display:none;">
+                                        <button class="btn-principal" onclick="document.getElementById('upload-avatar').click()" type="button">Alterar foto</button>
+                                        <button class="btn-secundario" id="btn-remover-avatar" type="button">Remover</button>
                                     </div>
                                 </div>
                             </div>
-                            <form id="profile-form">
-                                <div class="form-group">
+                            <form id="form-perfil">
+                                <div class="grupo-campo">
                                     <label>Nome completo</label>
-                                    <input type="text" id="prof-name" required>
+                                    <input type="text" id="prof-nome" required>
                                 </div>
-                                <div class="form-group">
+                                <div class="grupo-campo">
                                     <label>E-mail institucional</label>
                                     <input type="email" id="prof-email" required>
                                 </div>
-                                <div class="form-group">
+                                <div class="grupo-campo">
                                     <label>Nova Senha (deixe em branco para não alterar)</label>
-                                    <input type="password" id="prof-password" placeholder="********">
+                                    <input type="password" id="prof-senha" placeholder="********">
                                 </div>
-                                <div class="form-group">
+                                <div class="grupo-campo">
                                     <label>Confirmar Nova Senha</label>
-                                    <input type="password" id="prof-confirm-password" placeholder="********">
+                                    <input type="password" id="prof-confirmar-senha" placeholder="********">
                                 </div>
-                                <div class="form-group">
+                                <div class="grupo-campo">
                                     <label>Disciplinas ministradas</label>
-                                    <div class="checkbox-group" id="prof-subjects">
+                                    <div class="grupo-checkbox" id="prof-disciplinas">
                                         <label><input type="checkbox" value="Engenharia de Software"> Engenharia de Software</label>
                                         <label><input type="checkbox" value="Banco de Dados II"> Banco de Dados II</label>
                                         <label><input type="checkbox" value="Programação Web"> Programação Web</label>
                                     </div>
                                 </div>
-                                <button type="submit" class="btn-primary">Salvar</button>
+                                <button type="submit" class="btn-principal">Salvar</button>
                             </form>
                         </div>
                     </div>
