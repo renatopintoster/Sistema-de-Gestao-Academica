@@ -388,10 +388,22 @@ function renderFiles() {
         const li = document.createElement('li');
         li.innerHTML = `
             <span><i class="fas fa-file-pdf" style="color:var(--vermelho); margin-right:8px;"></i> ${f.name} <small>(${f.date})</small></span>
-            <a href="${f.data}" download="${f.name}"><i class="fas fa-download"></i> Baixar</a>
+            <div>
+                <a href="${f.data}" download="${f.name}" style="margin-right: 15px;"><i class="fas fa-download"></i> Baixar</a>
+                <a href="#" onclick="deleteFile(${f.id}); return false;" style="color: var(--vermelho);"><i class="fas fa-trash"></i> Excluir</a>
+            </div>
         `;
         ul.appendChild(li);
     });
+}
+
+function deleteFile(id) {
+    if(confirm('Tem certeza que deseja excluir este arquivo?')) {
+        let files = JSON.parse(localStorage.getItem('sga_files')) || [];
+        files = files.filter(f => f.id !== id);
+        localStorage.setItem('sga_files', JSON.stringify(files));
+        renderFiles();
+    }
 }
 
 // --- PERFIL (Apenas Home) ---
@@ -401,6 +413,8 @@ function loadProfile() {
 
     profName.value = currentUser.name;
     document.getElementById('prof-email').value = currentUser.email;
+    document.getElementById('prof-password').value = '';
+    document.getElementById('prof-confirm-password').value = '';
     
     const checkboxes = document.querySelectorAll('#prof-subjects input[type="checkbox"]');
     const userSubjects = currentUser.subjects || [];
@@ -413,13 +427,35 @@ const profileForm = document.getElementById('profile-form');
 if(profileForm) {
     profileForm.addEventListener('submit', (e) => {
         e.preventDefault();
+        
+        const users = JSON.parse(localStorage.getItem('sga_users'));
+        const idx = users.findIndex(u => u.email === currentUser.email);
+        
+        const newEmail = document.getElementById('prof-email').value;
+        const newPassword = document.getElementById('prof-password').value;
+        const confirmPassword = document.getElementById('prof-confirm-password').value;
+        
+        if (newEmail !== currentUser.email) {
+            if (users.find(u => u.email === newEmail)) {
+                alert('Este e-mail já está em uso por outro professor.');
+                return;
+            }
+        }
+        
+        if (newPassword) {
+            if (newPassword !== confirmPassword) {
+                alert('As novas senhas não coincidem!');
+                return;
+            }
+            currentUser.password = newPassword;
+        }
+
         currentUser.name = document.getElementById('prof-name').value;
+        currentUser.email = newEmail;
         
         const checkboxes = document.querySelectorAll('#prof-subjects input[type="checkbox"]:checked');
         currentUser.subjects = Array.from(checkboxes).map(cb => cb.value);
         
-        const users = JSON.parse(localStorage.getItem('sga_users'));
-        const idx = users.findIndex(u => u.email === currentUser.email);
         users[idx] = currentUser;
         localStorage.setItem('sga_users', JSON.stringify(users));
         
@@ -429,6 +465,9 @@ if(profileForm) {
         updateAvatars();
         alert('Perfil atualizado com sucesso!');
         renderClasses();
+        
+        document.getElementById('prof-password').value = '';
+        document.getElementById('prof-confirm-password').value = '';
     });
 }
 
