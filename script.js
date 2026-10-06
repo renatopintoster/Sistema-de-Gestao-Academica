@@ -13,9 +13,9 @@ function initData() {
     
     if (!localStorage.getItem('sga_classes')) {
         const defaultClasses = [
-            { id: 1, name: 'Engenharia de Software', period: 'ADS 2026.1', profEmail: 'professor@maisunifacisa.com.br' },
-            { id: 2, name: 'Banco de Dados II', period: 'ADS 2026.1', profEmail: 'professor@maisunifacisa.com.br' },
-            { id: 3, name: 'Programação Web', period: 'ADS 2026.1', profEmail: 'professor@maisunifacisa.com.br' }
+            { id: 1, name: 'Engenharia de Software', period: 'ADS 2026.1' },
+            { id: 2, name: 'Banco de Dados II', period: 'ADS 2026.1' },
+            { id: 3, name: 'Programação Web', period: 'ADS 2026.1' }
         ];
         localStorage.setItem('sga_classes', JSON.stringify(defaultClasses));
     }
@@ -221,22 +221,22 @@ function updateStudentGrades(student) {
     
     // Regra 7.1 - Composição da avaliação
     if(p1 !== null && p2 !== null && proj1 !== null && proj2 !== null) {
-        let ni = (p1 + p2) / 2;
-        let np = (proj1 + proj2) / 2;
-        let mf = (ni * 0.4) + (np * 0.6);
-        student.media = mf.toFixed(1);
+        let notaIndividual = (p1 + p2) / 2;
+        let notaProjeto  = (proj1 + proj2) / 2;
+        let mediaFinal = (notaIndividual * 0.4) + (notaProjeto   * 0.6);
+        student.media = mediaFinal.toFixed(2);
         
         // Regra 7.2 - Definição do status
-        if(mf >= 7.0) {
+        if(mediaFinal >= 7.0) {
             student.status = 'Aprovado';
-        } else if(mf < 7.0 && np < 4.0) {
+        } else if(mediaFinal < 7.0 && notaProjeto    < 4.0) {
             student.status = 'Reprovado';
         } else {
             student.status = 'Fará prova final';
             
             // Regra 7.3 - Resultado da prova final
             if(final !== null) {
-                if((np + final) >= 7.0) {
+                if((notaProjeto  + final) >= 7.0) {
                     student.status = 'Aprovado';
                 } else {
                     student.status = 'Reprovado';
