@@ -5,7 +5,7 @@ function initData() {
             email: 'professor@maisunifacisa.com.br',
             password: '123',
             name: 'Ana Paula Menezes',
-            subject: 'Engenharia de Software',
+            subjects: ['Engenharia de Software'],
             avatar: ''
         }];
         localStorage.setItem('sga_users', JSON.stringify(defaultUsers));
@@ -129,7 +129,6 @@ document.getElementById('register-form').addEventListener('submit', (e) => {
     e.preventDefault();
     const name = document.getElementById('reg-name').value;
     const email = document.getElementById('reg-email').value;
-    const subject = document.getElementById('reg-subject').value;
     const pass = document.getElementById('reg-password').value;
     const conf = document.getElementById('reg-confirm').value;
     
@@ -144,7 +143,7 @@ document.getElementById('register-form').addEventListener('submit', (e) => {
         return;
     }
     
-    users.push({ name, email, subject, password: pass, avatar: '' });
+    users.push({ name, email, subjects: [], password: pass, avatar: '' });
     localStorage.setItem('sga_users', JSON.stringify(users));
     alert('Cadastro realizado com sucesso!');
     showView('login-view');
@@ -166,7 +165,8 @@ document.querySelectorAll('.nav-item[data-target]').forEach(item => {
 
 // --- TURMAS ---
 function renderClasses() {
-    const classes = JSON.parse(localStorage.getItem('sga_classes')).filter(c => c.profEmail === currentUser.email);
+    const userSubjects = currentUser.subjects || [];
+    const classes = JSON.parse(localStorage.getItem('sga_classes')).filter(c => userSubjects.includes(c.name));
     const students = JSON.parse(localStorage.getItem('sga_students'));
     const grid = document.getElementById('classes-grid');
     grid.innerHTML = '';
@@ -381,13 +381,20 @@ function renderFiles() {
 function loadProfile() {
     document.getElementById('prof-name').value = currentUser.name;
     document.getElementById('prof-email').value = currentUser.email;
-    document.getElementById('prof-subject').value = currentUser.subject;
+    
+    const checkboxes = document.querySelectorAll('#prof-subjects input[type="checkbox"]');
+    const userSubjects = currentUser.subjects || [];
+    checkboxes.forEach(cb => {
+        cb.checked = userSubjects.includes(cb.value);
+    });
 }
 
 document.getElementById('profile-form').addEventListener('submit', (e) => {
     e.preventDefault();
     currentUser.name = document.getElementById('prof-name').value;
-    currentUser.subject = document.getElementById('prof-subject').value;
+    
+    const checkboxes = document.querySelectorAll('#prof-subjects input[type="checkbox"]:checked');
+    currentUser.subjects = Array.from(checkboxes).map(cb => cb.value);
     
     const users = JSON.parse(localStorage.getItem('sga_users'));
     const idx = users.findIndex(u => u.email === currentUser.email);
@@ -397,6 +404,7 @@ document.getElementById('profile-form').addEventListener('submit', (e) => {
     document.getElementById('sidebar-name').innerText = currentUser.name;
     updateAvatars();
     alert('Perfil atualizado com sucesso!');
+    renderClasses();
 });
 
 document.getElementById('avatar-upload').addEventListener('change', function(e) {

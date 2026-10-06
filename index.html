@@ -64,10 +64,6 @@
                             <input type="email" id="reg-email" required placeholder="professor@maisunifacisa.com.br">
                         </div>
                         <div class="form-group">
-                            <label>Disciplina principal</label>
-                            <input type="text" id="reg-subject" required placeholder="Engenharia de Software">
-                        </div>
-                        <div class="form-group">
                             <label>Senha</label>
                             <input type="password" id="reg-password" required placeholder="********">
                         </div>
@@ -196,13 +192,17 @@
                                     <label>E-mail institucional</label>
                                     <input type="email" id="prof-email" readonly disabled>
                                 </div>
-                                <div class="form-group">
-                                    <label>Disciplina principal</label>
-                                    <input type="text" id="prof-subject" required>
-                                </div>
-                                <button type="submit" class="btn-primary">Salvar</button>
-                            </form>
+                        <div class="form-group">
+                            <label>Disciplinas ministradas</label>
+                            <div class="checkbox-group" id="prof-subjects">
+                                <label><input type="checkbox" value="Engenharia de Software"> Engenharia de Software</label>
+                                <label><input type="checkbox" value="Banco de Dados II"> Banco de Dados II</label>
+                                <label><input type="checkbox" value="Programação Web"> Programação Web</label>
+                            </div>
                         </div>
+                        <button type="submit" class="btn-primary">Salvar</button>
+                    </form>
+                </div>
                     </div>
                 </div>
             </main>
