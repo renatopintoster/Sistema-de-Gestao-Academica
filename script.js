@@ -45,35 +45,10 @@ function initData() {
 initData();
 
 // --- ESTADO GLOBAL ---
-let currentUser = null;
+let currentUser = JSON.parse(sessionStorage.getItem('sga_currentUser'));
 let currentClassId = null;
 let currentPage = 1;
 const ITEMS_PER_PAGE = 5;
-
-// --- NAVEGAÇÃO VIEWS ---
-function showView(viewId) {
-    document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
-    document.getElementById(viewId).classList.add('active');
-}
-
-function showSubView(subViewId) {
-    document.querySelectorAll('.sub-view').forEach(el => el.classList.remove('active'));
-    document.getElementById(subViewId).classList.add('active');
-    
-    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-    const navItem = document.querySelector(`.nav-item[data-target="${subViewId}"]`);
-    if(navItem) navItem.classList.add('active');
-
-    if(subViewId === 'classes-list-view') {
-        document.getElementById('page-title').innerText = 'Minhas turmas';
-        renderClasses();
-    } else if (subViewId === 'profile-view') {
-        document.getElementById('page-title').innerText = 'Meu perfil';
-        loadProfile();
-    } else if (subViewId === 'class-detail-view') {
-        document.getElementById('page-title').innerText = 'Diário de Notas';
-    }
-}
 
 // --- UTILS ---
 function getInitials(name) {
@@ -86,89 +61,124 @@ function updateAvatars() {
     const elements = ['sidebar-avatar', 'header-avatar', 'profile-avatar'];
     elements.forEach(id => {
         const el = document.getElementById(id);
-        if(currentUser.avatar) {
-            el.style.backgroundImage = `url(${currentUser.avatar})`;
-            el.innerText = '';
-        } else {
-            el.style.backgroundImage = 'none';
-            el.innerText = inits;
+        if(el) {
+            if(currentUser.avatar) {
+                el.style.backgroundImage = `url(${currentUser.avatar})`;
+                el.innerText = '';
+            } else {
+                el.style.backgroundImage = 'none';
+                el.innerText = inits;
+            }
         }
     });
 }
 
-// --- LOGIN & REGISTRO ---
-document.getElementById('link-register').addEventListener('click', (e) => {
-    e.preventDefault();
-    showView('register-view');
-});
-document.getElementById('link-login').addEventListener('click', (e) => {
-    e.preventDefault();
-    showView('login-view');
-});
-
-document.getElementById('login-form').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const email = document.getElementById('login-email').value;
-    const pass = document.getElementById('login-password').value;
-    
-    const users = JSON.parse(localStorage.getItem('sga_users'));
-    const user = users.find(u => u.email === email && u.password === pass);
-    
-    if(user) {
-        currentUser = user;
-        document.getElementById('sidebar-name').innerText = user.name;
-        updateAvatars();
-        showView('home-view');
-        showSubView('classes-list-view');
+// Verifica sessão para home.html
+if (window.location.pathname.endsWith('home.html') || window.location.pathname.endsWith('home.html/')) {
+    if (!currentUser) {
+        window.location.href = 'index.html';
     } else {
-        alert('Credenciais inválidas!');
+        document.getElementById('sidebar-name').innerText = currentUser.name;
+        updateAvatars();
+        showSubView('classes-list-view');
     }
-});
+}
 
-document.getElementById('register-form').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const name = document.getElementById('reg-name').value;
-    const email = document.getElementById('reg-email').value;
-    const pass = document.getElementById('reg-password').value;
-    const conf = document.getElementById('reg-confirm').value;
+// --- NAVEGAÇÃO SUBVIEWS (Apenas Home) ---
+function showSubView(subViewId) {
+    document.querySelectorAll('.sub-view').forEach(el => el.classList.remove('active'));
+    const targetView = document.getElementById(subViewId);
+    if(targetView) targetView.classList.add('active');
     
-    if(pass !== conf) {
-        alert('As senhas não coincidem!');
-        return;
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    const navItem = document.querySelector(`.nav-item[data-target="${subViewId}"]`);
+    if(navItem) navItem.classList.add('active');
+
+    const pageTitle = document.getElementById('page-title');
+    if(pageTitle) {
+        if(subViewId === 'classes-list-view') {
+            pageTitle.innerText = 'Minhas turmas';
+            renderClasses();
+        } else if (subViewId === 'profile-view') {
+            pageTitle.innerText = 'Meu perfil';
+            loadProfile();
+        } else if (subViewId === 'class-detail-view') {
+            pageTitle.innerText = 'Diário de Notas';
+        }
     }
-    
-    const users = JSON.parse(localStorage.getItem('sga_users'));
-    if(users.find(u => u.email === email)) {
-        alert('E-mail já cadastrado!');
-        return;
-    }
-    
-    users.push({ name, email, subjects: [], password: pass, avatar: '' });
-    localStorage.setItem('sga_users', JSON.stringify(users));
-    alert('Cadastro realizado com sucesso!');
-    showView('login-view');
-    document.getElementById('register-form').reset();
-});
+}
 
-document.getElementById('btn-logout').addEventListener('click', () => {
-    currentUser = null;
-    document.getElementById('login-form').reset();
-    showView('login-view');
-});
+// --- LOGIN & REGISTRO ---
+const loginForm = document.getElementById('login-form');
+if (loginForm) {
+    loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const email = document.getElementById('login-email').value;
+        const pass = document.getElementById('login-password').value;
+        
+        const users = JSON.parse(localStorage.getItem('sga_users'));
+        const user = users.find(u => u.email === email && u.password === pass);
+        
+        if(user) {
+            sessionStorage.setItem('sga_currentUser', JSON.stringify(user));
+            window.location.href = 'home.html';
+        } else {
+            alert('Credenciais inválidas!');
+        }
+    });
+}
 
-// --- MENU LATERAL ---
+const registerForm = document.getElementById('register-form');
+if (registerForm) {
+    registerForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('reg-name').value;
+        const email = document.getElementById('reg-email').value;
+        const pass = document.getElementById('reg-password').value;
+        const conf = document.getElementById('reg-confirm').value;
+        
+        if(pass !== conf) {
+            alert('As senhas não coincidem!');
+            return;
+        }
+        
+        const users = JSON.parse(localStorage.getItem('sga_users'));
+        if(users.find(u => u.email === email)) {
+            alert('E-mail já cadastrado!');
+            return;
+        }
+        
+        users.push({ name, email, subjects: [], password: pass, avatar: '' });
+        localStorage.setItem('sga_users', JSON.stringify(users));
+        alert('Cadastro realizado com sucesso!');
+        window.location.href = 'index.html';
+    });
+}
+
+const btnLogout = document.getElementById('btn-logout');
+if(btnLogout) {
+    btnLogout.addEventListener('click', () => {
+        sessionStorage.removeItem('sga_currentUser');
+        window.location.href = 'index.html';
+    });
+}
+
+// --- MENU LATERAL (Apenas Home) ---
 document.querySelectorAll('.nav-item[data-target]').forEach(item => {
     item.addEventListener('click', () => {
         showSubView(item.getAttribute('data-target'));
     });
 });
 
-// --- TURMAS ---
+// --- TURMAS (Apenas Home) ---
 function renderClasses() {
+    const grid = document.getElementById('classes-grid');
+    if(!grid) return;
+
     const userSubjects = currentUser.subjects || [];
     const classes = JSON.parse(localStorage.getItem('sga_classes')).filter(c => userSubjects.includes(c.name));
     const students = JSON.parse(localStorage.getItem('sga_students'));
-    const grid = document.getElementById('classes-grid');
+    
     grid.innerHTML = '';
     
     classes.forEach(cls => {
@@ -197,11 +207,14 @@ function openClass(cls) {
     renderFiles();
 }
 
-document.getElementById('btn-back-classes').addEventListener('click', () => {
-    showSubView('classes-list-view');
-});
+const btnBackClasses = document.getElementById('btn-back-classes');
+if(btnBackClasses) {
+    btnBackClasses.addEventListener('click', () => {
+        showSubView('classes-list-view');
+    });
+}
 
-// --- LÓGICA DE NOTAS ---
+// --- LÓGICA DE NOTAS (Apenas Home) ---
 function parseNota(val) {
     if(val === '' || val === null || val === undefined) return null;
     let n = parseFloat(val);
@@ -219,14 +232,12 @@ function updateStudentGrades(student) {
     student.media = null;
     student.status = '-';
     
-    // Regra 7.1 - Composição da avaliação
     if(p1 !== null && p2 !== null && proj1 !== null && proj2 !== null) {
         let notaIndividual = (p1 + p2) / 2;
         let notaProjeto  = (proj1 + proj2) / 2;
         let mediaFinal = (notaIndividual * 0.4) + (notaProjeto   * 0.6);
         student.media = mediaFinal.toFixed(2);
         
-        // Regra 7.2 - Definição do status
         if(mediaFinal >= 7.0) {
             student.status = 'Aprovado';
         } else if(mediaFinal < 7.0 && notaProjeto    < 4.0) {
@@ -234,7 +245,6 @@ function updateStudentGrades(student) {
         } else {
             student.status = 'Fará prova final';
             
-            // Regra 7.3 - Resultado da prova final
             if(final !== null) {
                 if((notaProjeto  + final) >= 7.0) {
                     student.status = 'Aprovado';
@@ -250,7 +260,6 @@ function saveGrades() {
     const students = JSON.parse(localStorage.getItem('sga_students'));
     const index = students.findIndex(s => s.id === this.studentId);
     if(index > -1) {
-        // Validação básica 0 a 10
         let val = parseFloat(this.el.value);
         if(this.el.value !== '' && (isNaN(val) || val < 0 || val > 10)) {
             alert('Nota inválida. Digite um valor entre 0 e 10.');
@@ -266,15 +275,16 @@ function saveGrades() {
 }
 
 function renderGrades() {
+    const tbody = document.getElementById('grades-tbody');
+    if(!tbody) return;
+
     const allStudents = JSON.parse(localStorage.getItem('sga_students'));
     const classStudents = allStudents.filter(s => s.classId === currentClassId);
     
-    // Paginação
     const totalPages = Math.ceil(classStudents.length / ITEMS_PER_PAGE);
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
     const paginated = classStudents.slice(start, start + ITEMS_PER_PAGE);
     
-    const tbody = document.getElementById('grades-tbody');
     tbody.innerHTML = '';
     
     paginated.forEach(s => {
@@ -315,6 +325,7 @@ function renderGrades() {
 
 function renderPagination(totalPages) {
     const pag = document.getElementById('pagination');
+    if(!pag) return;
     pag.innerHTML = '';
     for(let i=1; i<=totalPages; i++) {
         const btn = document.createElement('button');
@@ -325,41 +336,47 @@ function renderPagination(totalPages) {
     }
 }
 
-// --- ARQUIVOS (Desafio Extra) ---
-document.getElementById('file-upload').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if(!file) return;
-    if(file.type !== 'application/pdf') {
-        alert('Apenas arquivos PDF são permitidos.');
-        return;
-    }
-    
-    const reader = new FileReader();
-    reader.onload = function(evt) {
-        const base64 = evt.target.result;
-        const files = JSON.parse(localStorage.getItem('sga_files')) || [];
-        try {
-            files.push({
-                id: Date.now(),
-                classId: currentClassId,
-                name: file.name,
-                data: base64,
-                date: new Date().toLocaleDateString()
-            });
-            localStorage.setItem('sga_files', JSON.stringify(files));
-            renderFiles();
-        } catch(err) {
-            alert('Erro ao salvar. O arquivo pode ser muito grande para o armazenamento local. O limite do navegador pode ter sido excedido.');
+// --- ARQUIVOS (Apenas Home) ---
+const fileUpload = document.getElementById('file-upload');
+if(fileUpload) {
+    fileUpload.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if(!file) return;
+        if(file.type !== 'application/pdf') {
+            alert('Apenas arquivos PDF são permitidos.');
+            return;
         }
-    };
-    reader.readAsDataURL(file);
-    e.target.value = ''; // reseta o input
-});
+        
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            const base64 = evt.target.result;
+            const files = JSON.parse(localStorage.getItem('sga_files')) || [];
+            try {
+                files.push({
+                    id: Date.now(),
+                    classId: currentClassId,
+                    name: file.name,
+                    data: base64,
+                    date: new Date().toLocaleDateString()
+                });
+                localStorage.setItem('sga_files', JSON.stringify(files));
+                renderFiles();
+            } catch(err) {
+                alert('Erro ao salvar. O arquivo pode ser muito grande para o armazenamento local. O limite do navegador pode ter sido excedido.');
+            }
+        };
+        reader.readAsDataURL(file);
+        e.target.value = '';
+    });
+}
 
 function renderFiles() {
+    const ul = document.getElementById('files-list');
+    if(!ul) return;
+    
     const allFiles = JSON.parse(localStorage.getItem('sga_files')) || [];
     const classFiles = allFiles.filter(f => f.classId === currentClassId);
-    const ul = document.getElementById('files-list');
+    
     ul.innerHTML = '';
     
     if(classFiles.length === 0) {
@@ -377,9 +394,12 @@ function renderFiles() {
     });
 }
 
-// --- PERFIL ---
+// --- PERFIL (Apenas Home) ---
 function loadProfile() {
-    document.getElementById('prof-name').value = currentUser.name;
+    const profName = document.getElementById('prof-name');
+    if(!profName) return;
+
+    profName.value = currentUser.name;
     document.getElementById('prof-email').value = currentUser.email;
     
     const checkboxes = document.querySelectorAll('#prof-subjects input[type="checkbox"]');
@@ -389,50 +409,63 @@ function loadProfile() {
     });
 }
 
-document.getElementById('profile-form').addEventListener('submit', (e) => {
-    e.preventDefault();
-    currentUser.name = document.getElementById('prof-name').value;
-    
-    const checkboxes = document.querySelectorAll('#prof-subjects input[type="checkbox"]:checked');
-    currentUser.subjects = Array.from(checkboxes).map(cb => cb.value);
-    
-    const users = JSON.parse(localStorage.getItem('sga_users'));
-    const idx = users.findIndex(u => u.email === currentUser.email);
-    users[idx] = currentUser;
-    localStorage.setItem('sga_users', JSON.stringify(users));
-    
-    document.getElementById('sidebar-name').innerText = currentUser.name;
-    updateAvatars();
-    alert('Perfil atualizado com sucesso!');
-    renderClasses();
-});
+const profileForm = document.getElementById('profile-form');
+if(profileForm) {
+    profileForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        currentUser.name = document.getElementById('prof-name').value;
+        
+        const checkboxes = document.querySelectorAll('#prof-subjects input[type="checkbox"]:checked');
+        currentUser.subjects = Array.from(checkboxes).map(cb => cb.value);
+        
+        const users = JSON.parse(localStorage.getItem('sga_users'));
+        const idx = users.findIndex(u => u.email === currentUser.email);
+        users[idx] = currentUser;
+        localStorage.setItem('sga_users', JSON.stringify(users));
+        
+        sessionStorage.setItem('sga_currentUser', JSON.stringify(currentUser));
+        
+        document.getElementById('sidebar-name').innerText = currentUser.name;
+        updateAvatars();
+        alert('Perfil atualizado com sucesso!');
+        renderClasses();
+    });
+}
 
-document.getElementById('avatar-upload').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if(!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = function(evt) {
-        try {
-            currentUser.avatar = evt.target.result;
-            const users = JSON.parse(localStorage.getItem('sga_users'));
-            const idx = users.findIndex(u => u.email === currentUser.email);
-            users[idx].avatar = currentUser.avatar;
-            localStorage.setItem('sga_users', JSON.stringify(users));
-            updateAvatars();
-        } catch(err) {
-            alert('A imagem é muito grande para ser salva no armazenamento local.');
-        }
-    };
-    reader.readAsDataURL(file);
-    e.target.value = '';
-});
+const avatarUpload = document.getElementById('avatar-upload');
+if(avatarUpload) {
+    avatarUpload.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if(!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            try {
+                currentUser.avatar = evt.target.result;
+                const users = JSON.parse(localStorage.getItem('sga_users'));
+                const idx = users.findIndex(u => u.email === currentUser.email);
+                users[idx].avatar = currentUser.avatar;
+                localStorage.setItem('sga_users', JSON.stringify(users));
+                sessionStorage.setItem('sga_currentUser', JSON.stringify(currentUser));
+                updateAvatars();
+            } catch(err) {
+                alert('A imagem é muito grande para ser salva no armazenamento local.');
+            }
+        };
+        reader.readAsDataURL(file);
+        e.target.value = '';
+    });
+}
 
-document.getElementById('btn-remove-avatar').addEventListener('click', () => {
-    currentUser.avatar = '';
-    const users = JSON.parse(localStorage.getItem('sga_users'));
-    const idx = users.findIndex(u => u.email === currentUser.email);
-    users[idx].avatar = '';
-    localStorage.setItem('sga_users', JSON.stringify(users));
-    updateAvatars();
-});
+const btnRemoveAvatar = document.getElementById('btn-remove-avatar');
+if(btnRemoveAvatar) {
+    btnRemoveAvatar.addEventListener('click', () => {
+        currentUser.avatar = '';
+        const users = JSON.parse(localStorage.getItem('sga_users'));
+        const idx = users.findIndex(u => u.email === currentUser.email);
+        users[idx].avatar = '';
+        localStorage.setItem('sga_users', JSON.stringify(users));
+        sessionStorage.setItem('sga_currentUser', JSON.stringify(currentUser));
+        updateAvatars();
+    });
+}
